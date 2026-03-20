@@ -35,13 +35,7 @@ elif [ -n "${MEMORY}" ]; then
 fi
 
 # Some test Java Arguments in an attempt to increase server performance
-if [ -n "${MEMORY_PRETOUCH}" ]; then
-  ARGS="${ARGS} -XX:+AlwaysPreTouch"
-fi
-
-if [ -n "${NO_MEMORY_UNCOMMIT}" ]; then
-  ARGS="${ARGS} -XX:-ZUncommit"
-fi
+ARGS="${ARGS} -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:-ZUncommit -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:ConcGCThreads=4"
 
 # Option to perform a Soft Reset
 if [ "${SOFTRESET}" == "1" ] || [ "${SOFTRESET,,}" == "true" ]; then
