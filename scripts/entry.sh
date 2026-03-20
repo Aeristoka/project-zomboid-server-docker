@@ -34,6 +34,15 @@ elif [ -n "${MEMORY}" ]; then
   ARGS="${ARGS} -Xms${MEMORY} -Xmx${MEMORY}"
 fi
 
+# Some test Java Arguments in an attempt to increase server performance
+if [ -n "${MEMORY_PRETOUCH}" ]; then
+  ARGS="${ARGS} -XX:+AlwaysPreTouch"
+fi
+
+if [ -n "${NO_MEMORY_UNCOMMIT}" ]; then
+  ARGS="${ARGS} -XX:-ZUncommit"
+fi
+
 # Option to perform a Soft Reset
 if [ "${SOFTRESET}" == "1" ] || [ "${SOFTRESET,,}" == "true" ]; then
   ARGS="${ARGS} -Dsoftreset"
