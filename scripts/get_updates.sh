@@ -186,19 +186,19 @@ echo -e "\n\n*******************************************************************
 echo "Checking the latest stable version..."
 NEW_VERSION=$(versionCompare ${LATEST_STABLE_VERSION} ${LATEST_IMAGE_STABLE_VERSION})
 
-if [ "${LATEST_IMAGE_STABLE_VERSION}" == "" ] || [ $NEW_VERSION == 1 ]; then
-  echo -e "\n\nA new version of the stable server was detected ($LATEST_STABLE_VERSION). Creating the new image...\n"
+if [ "${LATEST_IMAGE_STABLE_VERSION}" == "" ] || [ $NEW_VERSION == -1 ]; then
+  echo -e "\n\nA new version of the unstable server was detected ($LATEST_STABLE_VERSION). Creating the new image...\n"
 
-  docker build --compress --no-cache -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:latest-release -t ${DOCKER_IMAGE}:${LATEST_STABLE_VERSION}-release .
-  docker push ${DOCKER_IMAGE}:${LATEST_STABLE_VERSION}-release
+  docker build --compress --no-cache -t ${DOCKER_IMAGE}:latest -t ${DOCKER_IMAGE}:latest-release -t ${DOCKER_IMAGE}:${LATEST_SERVER_VERSION}-release .
+  docker push ${DOCKER_IMAGE}:${LATEST_SERVER_VERSION}-release
   docker push ${DOCKER_IMAGE}:latest-release
   docker push ${DOCKER_IMAGE}:latest
 elif [ $NEW_VERSION == 0 ]; then
-  echo -e "\n\nThere is no new stable version of the Zomboid server\n\n"
-elif [ $NEW_VERSION == -1 ]; then
-  echo -e "\n\nServer stable version (${LATEST_STABLE_VERSION}) is lower than latest docker version (${LATEST_IMAGE_STABLE_VERSION})... Please, check this script because maybe is not working correctly\n\n"
+  echo -e "\n\nThere is no new unstable version of the Zomboid server\n\n"
+elif [ $NEW_VERSION == 1 ]; then
+  echo -e "\n\nServer unstable version (${LATEST_STABLE_VERSION}) is lower than latest docker version (${LATEST_IMAGE_STABLE_VERSION})... Please, check this script because maybe is not working correctly\n\n"
 else
-  echo -e "\n\nThere was an unknown error checking the stable version.\n\n"
+  echo -e "\n\nThere was an unknown error checking the unstable version.\n\n"
 fi
 echo "****************************************************************************"
 echo -e "\n\n"
