@@ -35,7 +35,7 @@ elif [ -n "${MEMORY}" ]; then
 fi
 
 # Some test Java Arguments in an attempt to increase server performance
-ARGS="${ARGS} -XX:+UnlockExperimentalVMOptions -XX:-OmitStackTraceInFastThrow -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:-ZUncommit -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication"
+ARGS="${ARGS} -XX:+UnlockExperimentalVMOptions -XX:-OmitStackTraceInFastThrow -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:-ZUncommit -XX:+ParallelRefProcEnabled -XX:+UseStringDeduplication -XX:+UseTransparentHugePages"
 
 # Option to perform a Soft Reset
 if [ "${SOFTRESET}" == "1" ] || [ "${SOFTRESET,,}" == "true" ]; then
