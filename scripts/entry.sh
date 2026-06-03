@@ -193,7 +193,8 @@ if [ -e "${HOMEDIR}/pz-dedicated/steamapps/workshop/content/108600" ]; then
 
   map_list=""
   source /server/scripts/search_folder.sh "${HOMEDIR}/pz-dedicated/steamapps/workshop/content/108600"
-  map_list=$(<"${HOMEDIR}/maps.txt")  
+  map_list=$(<"${HOMEDIR}/maps.txt")
+  map_list=$(echo "$map_list" | tr ';' '\n' | grep -v '^$' | sort -u | tr '\n' ';')
   rm "${HOMEDIR}/maps.txt"
 
   if [ -n "${map_list}" ]; then

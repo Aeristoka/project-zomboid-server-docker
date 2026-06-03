@@ -35,11 +35,9 @@ search_folder() {
                             for dir in "$internal_folder/media/maps"/*/; do
                                 if [ -d "$dir" ]; then
                                     dir_name=$(basename "$dir")
-                                    map_list+="$dir_name;"     
+                                    map_list+="$dir_name;"
                                 fi
                             done
-                            # Remove duplicate entries from map_list
-                            map_list=$(echo "$map_list" | tr ';' '\n' | sort -u | tr '\n' ';' | sed 's/;$//')
                             # Exports to .txt file to add to .ini file in entry.sh
                             echo -n "$map_list" >> "${HOMEDIR}/maps.txt"
                         fi
