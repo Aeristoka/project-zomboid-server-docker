@@ -48,6 +48,8 @@ This image uses some env variables as arguments in the server command, allowing 
 
 `PORT:` Set the server port. By default 16261
 
+`UDPPORT:` Set the second UDP port used by the server for direct connections (the `UDPPort` setting in the server INI file). By default 16262. This setting has no command line argument, so it is applied through the INI file.
+
 `SERVERNAME:` Set the server name, which allows you to have multiple server versions. Changing the name will create a new server data, so current progress will not be available. Also will not be lost, just reverting the server name change will load it again. **NOTE: Don't use spaces or special characters or admin user will fail**
 
 `SERVERPRESET:` Set the new servers default preset. If not set, the default is apocalypse. Allowed options are Apocalypse, Beginner, Builder, FirstWeek, SixMonthsLater, Survival and Survivor.

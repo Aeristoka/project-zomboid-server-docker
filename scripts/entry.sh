@@ -149,24 +149,56 @@ if [ -n "${STEAMPORT2}" ]; then
   ARGS="${ARGS} -steamport2 ${STEAMPORT2}"
 fi
 
+#############################################
+#                                           #
+# Server INI file settings                  #
+#                                           #
+#############################################
+
+# The settings below live in the server INI file, which the server only creates on its
+# first boot. Previously the sed commands silently did nothing on a fresh server (the
+# file didn't exist yet), so these variables required a manual restart to take effect.
+# Pre-creating an empty INI file fixes that: the server loads it on first boot, keeps
+# the options set here and fills in every missing option with its default value.
+SERVERINI="${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+if [ ! -f "${SERVERINI}" ]; then
+  mkdir -p "${HOMEDIR}/Zomboid/Server/"
+  touch "${SERVERINI}"
+fi
+
+# Set an option in the server INI file: replace it when present, append it when missing.
+set_ini_option() {
+  if grep -q "^${1}=" "${SERVERINI}"; then
+    sed -i "s|^${1}=.*|${1}=${2}|" "${SERVERINI}"
+  else
+    echo "${1}=${2}" >> "${SERVERINI}"
+  fi
+}
+
 if [ -n "${PASSWORD}" ]; then
-	sed -i "s/^Password=.*/Password=${PASSWORD}/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+  set_ini_option "Password" "${PASSWORD}"
 fi
 
 if [ -n "${RCONPASSWORD}" ]; then
-	sed -i "s/^RCONPassword=.*/RCONPassword=${RCONPASSWORD}/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+  set_ini_option "RCONPassword" "${RCONPASSWORD}"
 fi
 
 # Shows the server on the in-game browser.
 if [ "${PUBLIC}" == "1" ] || [ "${PUBLIC,,}" == "true" ]; then
-  sed -i "s/^Public=.*/Public=true/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+  set_ini_option "Public" "true"
 elif [ "${PUBLIC}" == "0" ] || [ "${PUBLIC,,}" == "false" ]; then
-  sed -i "s/^Public=.*/Public=false/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+  set_ini_option "Public" "false"
 fi
 
 # Set the display name for the server.
 if [ -n "${DISPLAYNAME}" ]; then
-  sed -i "s/^PublicName=.*/PublicName=${DISPLAYNAME}/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+  set_ini_option "PublicName" "${DISPLAYNAME}"
+fi
+
+# Set the second UDP port used for direct connections (UDPPort INI setting, by default 16262).
+# There is no command line argument for this port, so it can only be set through the INI file.
+if [ -n "${UDPPORT}" ]; then
+  set_ini_option "UDPPort" "${UDPPORT}"
 fi
 
 if [ "${SELF_MANAGED_MODS}" == "1" ] || [ "${SELF_MANAGED_MODS,,}" == "true" ]; then
@@ -174,15 +206,15 @@ if [ "${SELF_MANAGED_MODS}" == "1" ] || [ "${SELF_MANAGED_MODS,,}" == "true" ]; 
 else
   if [ -n "${MOD_IDS}" ]; then
     echo "*** INFO: Found Mods including ${MOD_IDS} ***"
-    sed -i "s/Mods=.*/Mods=${MOD_IDS}/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+    set_ini_option "Mods" "${MOD_IDS}"
   fi
 
   if [ -n "${WORKSHOP_IDS}" ]; then
     echo "*** INFO: Found Workshop IDs including ${WORKSHOP_IDS} ***"
-    sed -i "s/WorkshopItems=.*/WorkshopItems=${WORKSHOP_IDS}/" "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+    set_ini_option "WorkshopItems" "${WORKSHOP_IDS}"
   else
     echo "*** INFO: Workshop IDs is empty, clearing configuration ***"
-    sed -i 's/WorkshopItems=.*$/WorkshopItems=/' "${HOMEDIR}/Zomboid/Server/${SERVERNAME}.ini"
+    set_ini_option "WorkshopItems" ""
   fi
 fi
 
