@@ -263,7 +263,39 @@ if [ -d "${WORKSHOP_CONTENT_DIR}" ]; then
     # A `sed` substitution can only rewrite an already existing Map= line. On a brand new
     # server the INI is still empty at this point, so the maps were silently dropped and
     # only showed up after an extra restart. set_ini_option appends it when missing.
-    set_ini_option "Map" "${map_list}Muldraugh, KY"
+    # Merge the detected maps into the Map= line instead of rebuilding it from the scan.
+    # Rebuilding threw away every manual edit on each start: a map folder shipped by two
+    # mod folders (a map plus its patch mod, or a B41 and a B42 copy inside one workshop
+    # item) landed in the line twice, e.g. "Map=AZSpawn;AZSpawn;Muldraugh, KY"; map folders
+    # the scan cannot see (a mod that is not laid out as mods/<mod>/media/maps) were
+    # dropped; and the load order the admin chose was replaced by the order the folders
+    # happen to be read in.
+    BASE_MAP="Muldraugh, KY"
+    current_maps=""
+    if [ -f "${SERVERINI}" ] && grep -q "^Map=" "${SERVERINI}"; then
+      current_maps="$(grep -m1 "^Map=" "${SERVERINI}" | cut -d "=" -f2-)"
+    fi
+
+    merged_maps=""
+    add_map() {
+      [ -z "${1}" ] && return
+      [ "${1}" == "${BASE_MAP}" ] && return
+      case ";${merged_maps}" in *";${1};"*) return;; esac
+      merged_maps+="${1};"
+    }
+
+    # What the INI already lists keeps its place, anything newly found is appended after
+    # it, and the base map stays last where the game expects it.
+    IFS=";" read -ra current_entries <<< "${current_maps}"
+    for entry in "${current_entries[@]}"; do
+      add_map "${entry}"
+    done
+    IFS=";" read -ra found_entries <<< "${map_list}"
+    for entry in "${found_entries[@]}"; do
+      add_map "${entry}"
+    done
+
+    set_ini_option "Map" "${merged_maps}${BASE_MAP}"
 
     # Checks which added maps have spawnpoints.lua files and adds them to the spawnregions file if they aren't already added
     # The server writes the spawnregions file itself on its first run, so it may not be
