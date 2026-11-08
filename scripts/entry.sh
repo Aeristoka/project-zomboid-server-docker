@@ -45,6 +45,23 @@ elif [ -n "${MEMORY}" ]; then
   ARGS+=("-Xms${MEMORY}" "-Xmx${MEMORY}")
 fi
 
+# JVM performance arguments (uses JVM_ARGS from .env if defined, otherwise defaults to tuned parameters)
+DEFAULT_JVM_ARGS=(
+  "-XX:-OmitStackTraceInFastThrow"
+  "-XX:ReservedCodeCacheSize=512m"
+  "-Djava.net.preferIPv4Stack=true"
+  "-XX:+AlwaysPreTouch"
+  "-XX:+PerfDisableSharedMem"
+  "-XX:+UseStringDeduplication"
+)
+
+if [ -n "${JVM_ARGS}" ]; then
+  read -ra CUSTOM_JVM_ARGS <<< "${JVM_ARGS}"
+  ARGS+=("${CUSTOM_JVM_ARGS[@]}")
+else
+  ARGS+=("${DEFAULT_JVM_ARGS[@]}")
+fi
+
 # Option to perform a Soft Reset
 if [ "${SOFTRESET}" == "1" ] || [ "${SOFTRESET,,}" == "true" ]; then
   ARGS+=("-Dsoftreset")

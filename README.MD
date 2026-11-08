@@ -44,6 +44,8 @@ This image uses some env variables as arguments in the server command, allowing 
 
 `MEMORY:` Amount of memory to use in the server JVM (e.g., 8096m). This variable is used as a fallback for both minimum and maximum memory if `MIN_MEMORY` and `MAX_MEMORY` are not defined.
 
+`JVM_ARGS:` Custom Java Virtual Machine arguments to pass to the server on startup. If left unset, tuned high-performance flags are automatically used.
+
 `MODFOLDERS`: Mod folders to use to load the game mods. Allowed options are workshop, steam, and mods. Options must be separated by comma, for example: workshop,steam,mods
 
 `NOSTEAM:` Starts the server in NoSteam mode, allowing to non steam users to connect.
