@@ -22,7 +22,9 @@ services:
       # was unreachable from outside the container.
       - "${PORT:-16261}:${PORT:-16261}/udp"
       - "${UDPPORT:-16262}:${UDPPORT:-16262}/udp"
-      - "27015:27015/tcp"
+      # RCON is only published on the host loopback. Remove the 127.0.0.1 prefix to allow
+      # remote RCON (and then set a strong RCONPASSWORD).
+      - "127.0.0.1:27015:27015/tcp"
     volumes:
       # Server data
       - ${PROJECT_ZOMBOID_DATA:-./data}:/home/steam/Zomboid

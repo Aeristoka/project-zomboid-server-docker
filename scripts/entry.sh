@@ -2,6 +2,21 @@
 
 cd ${STEAMAPPDIR}
 
+# Until the server is launched (see "Graceful shutdown" below) there is nothing to save, but
+# PID 1 ignores signals it has no handler for, so a `docker stop` during the update, the
+# map copy or the chown would otherwise hang until the grace period ends and then SIGKILL.
+# Long-running steps are started in the background and waited on (EARLY_CHILD) because bash
+# only runs a trap between foreground commands, whereas `wait` is interrupted immediately.
+EARLY_CHILD=""
+early_shutdown() {
+  echo "*** INFO: Shutdown signal received during startup, exiting ***"
+  if [ -n "${EARLY_CHILD}" ]; then
+    kill -TERM "${EARLY_CHILD}" 2>/dev/null
+  fi
+  exit 143
+}
+trap early_shutdown TERM INT
+
 #####################################
 #                                   #
 # Force an update if the env is set #
@@ -25,7 +40,12 @@ if [ "${FORCEUPDATE}" == "1" ] || [ "${FORCEUPDATE,,}" == "true" ]; then
   else
     STEAMAPPBRANCH_ARGS=(-beta "${STEAMAPPBRANCH}")
   fi
-  bash "${STEAMCMDDIR}/steamcmd.sh" +force_install_dir "${STEAMAPPDIR}" +login anonymous +app_update "${STEAMAPPID}" "${STEAMAPPBRANCH_ARGS[@]}" validate +quit
+  bash "${STEAMCMDDIR}/steamcmd.sh" +force_install_dir "${STEAMAPPDIR}" +login anonymous +app_update "${STEAMAPPID}" "${STEAMAPPBRANCH_ARGS[@]}" validate +quit &
+  EARLY_CHILD=$!
+  wait "${EARLY_CHILD}"
+  EARLY_CHILD=""
+  # steamcmd runs as root here, so hand the updated game files back to the server user.
+  chown -R "${USER}:${USER}" "${STEAMAPPDIR}"
 fi
 
 
@@ -150,7 +170,7 @@ fi
 
 # Option to handle multiple network cards. Example: 127.0.0.1
 if [ -n "${IP}" ]; then
-  ARGS+=("${IP}" "-ip" "${IP}")
+  ARGS+=("-ip" "${IP}")
 fi
 
 # Set the DefaultPort for the server. Example: 16261

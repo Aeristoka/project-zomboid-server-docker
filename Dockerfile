@@ -71,5 +71,5 @@ WORKDIR ${HOMEDIR}
 EXPOSE 16261-16262/udp \
   27015/tcp
 HEALTHCHECK --interval=2m --timeout=3s --start-period=10s --retries=5\
-  CMD nc -z -u -w 2 127.0.0.1 16261 || exit 1
+  CMD nc -z -u -w 2 127.0.0.1 "${PORT:-16261}" || exit 1
 ENTRYPOINT ["/server/scripts/entry.sh"]
