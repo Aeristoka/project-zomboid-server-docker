@@ -1,0 +1,11 @@
+.git
+.gitignore
+README.md
+README.MD
+LICENSE
+.env
+data/
+workshop-mods/
+.vscode
+*.log
+.DS_Store
